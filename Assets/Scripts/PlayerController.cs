@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -9,10 +10,14 @@ public class PlayerController : MonoBehaviour
     public Animator Animator;
     public Transform playerTransform;
     public Rigidbody rb;
+    public Pool pool;
     public float speed;
     public float aaa;
+    public float force;
     public bool isGameEnd, isPlayerJump; //false
     Sequence seq;
+    public int CoinCounter;
+    public TMP_Text CoinCounterText;
 
     private void Awake()
     {
@@ -82,14 +87,14 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.W))
         {
             rb.velocity = new Vector3(0, 0, speed);
-            playerTransform.DOMoveY(-2.8f, 1);
+            playerTransform.DOMoveY(-1.8f, 1);
             Animator.SetBool("isSwimming", true);
             Animator.SetBool("isTreading", false);
         }
 
         else
         {
-            playerTransform.DOMoveY(-4, 1);
+            playerTransform.DOMoveY(-3.22f, 1);
             Animator.SetBool("isSwimming", false);
             Animator.SetBool("isTreading", true);
         }
@@ -128,6 +133,37 @@ public class PlayerController : MonoBehaviour
                 playerTransform.DOMove(new Vector3(playerTransform.position.x, playerTransform.position.y - 0.5f, playerTransform.position.z + 2.5f),speed);
                 yield return new WaitForSeconds(3);
                 isGameEnd = true;
+            }
+        }
+
+        if (other.gameObject.tag == "Coin")
+        {
+            CoinCounter++;
+            CoinCounterText.text = "Coin = " + CoinCounter;
+            StartCoroutine(DestroyItem());
+            IEnumerator DestroyItem()
+            {
+                seq.Append(other.transform.DOLocalMoveY(1, speed / 2));
+                seq.Join(other.transform.DOScale(Vector3.zero, speed / 2));
+                yield return new WaitForSeconds(speed);
+                pool.GetComponent<Pool>().ResendItemToPool(other.gameObject);
+                //Destroy(this.gameObject);
+            }
+
+        }
+    }
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.tag == "Lifeline")
+        {
+            StartCoroutine(DestroyItem());
+            IEnumerator DestroyItem()
+            {
+                gameObject.GetComponent<Rigidbody>().AddForce(Vector3.back * force * speed);
+                other.gameObject.transform.DOScale(Vector3.zero, speed / 2);
+                yield return new WaitForSeconds(speed);
+                pool.GetComponent<Pool>().ResendItemToPool(other.gameObject);
+                //Destroy(this.gameObject);
             }
         }
     }

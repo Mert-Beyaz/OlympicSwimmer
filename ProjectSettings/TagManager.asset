@@ -8,6 +8,10 @@ TagManager:
   - Swimmer
   - SwimmerAi
   - GameManager
+  - CoinCounterText
+  - Canvas
+  - Coin
+  - Lifeline
   layers:
   - Default
   - TransparentFX
