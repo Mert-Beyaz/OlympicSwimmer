@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
     public Animator Animator;
     public Transform playerTransform;
     public Rigidbody rb;
-    public int speed;
+    public float speed;
     public float aaa;
     public bool isGameEnd, isPlayerJump; //false
     Sequence seq;
@@ -108,7 +108,7 @@ public class PlayerController : MonoBehaviour
             if (playerTransform.position.x <= 2)
             {
                 playerTransform.DOMove(new Vector3(playerTransform.position.x + 2, playerTransform.position.y, playerTransform.position.z), (speed/5f));
-                //playerTransform.position = Vector3.Lerp(playerTransform.position, (playerTransform.position + (new Vector3(2, 0, 0))), speed/aaa);
+                //playerTransform.position = Vector3.Lerp(playerTransform.position, (playerTransform.position + (new Vector3(2, 0, 0))), speed * Time.deltaTime);           
                 //Lerp ile yapmayı dene daha soft bir geçiş lazım
             }
         }
