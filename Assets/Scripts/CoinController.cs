@@ -10,7 +10,7 @@ public class CoinController : MonoBehaviour
 {
     //private void OnTriggerStay(Collider other)
     //{
-        
+
     //    if (other.gameObject.tag == "SwimmerAi")
     //    {
     //        StartCoroutine(DestroyItem());

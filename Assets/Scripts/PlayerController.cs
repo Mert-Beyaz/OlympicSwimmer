@@ -11,9 +11,7 @@ public class PlayerController : MonoBehaviour
     public Transform playerTransform;
     public Rigidbody rb;
     public Pool pool;
-    public float speed;
-    public float aaa;
-    public float force;
+    public float speed, force;
     public bool isGameEnd, isPlayerJump; //false
     Sequence seq;
     public int CoinCounter;
@@ -32,6 +30,7 @@ public class PlayerController : MonoBehaviour
     {
         Animator = GetComponent<Animator>();
         playerTransform = GetComponent<Transform>();
+        pool = GetComponent<Pool>();
     }
 
 
@@ -53,8 +52,8 @@ public class PlayerController : MonoBehaviour
             StartCoroutine(WaitJump());
             IEnumerator WaitJump()
             {
-                yield return new WaitForSeconds(2);
                 isPlayerJump = true;
+                yield return new WaitForSeconds(2);
             }
             Animator.SetBool("isTreading", true);
         }
@@ -69,8 +68,8 @@ public class PlayerController : MonoBehaviour
             StartCoroutine(WaitJump());
             IEnumerator WaitJump()
             {
-                yield return new WaitForSeconds(4.5f);
                 isPlayerJump = true;
+                yield return new WaitForSeconds(4.5f);
             }
             Animator.SetBool("isTreading", true);
         }
@@ -119,6 +118,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void FinishRace()
+    {
+        isGameEnd = true;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "finishLine")
@@ -132,7 +136,7 @@ public class PlayerController : MonoBehaviour
                 //playerTransform.position = Vector3.Lerp(playerTransform.position, (playerTransform.position + (new Vector3(1,1,1)), 0.5f * Time.deltaTime));
                 playerTransform.DOMove(new Vector3(playerTransform.position.x, playerTransform.position.y - 0.5f, playerTransform.position.z + 2.5f),speed);
                 yield return new WaitForSeconds(3);
-                isGameEnd = true;
+                FinishRace();
             }
         }
 
@@ -146,8 +150,7 @@ public class PlayerController : MonoBehaviour
                 seq.Append(other.transform.DOLocalMoveY(1, speed / 2));
                 seq.Join(other.transform.DOScale(Vector3.zero, speed / 2));
                 yield return new WaitForSeconds(speed);
-                pool.GetComponent<Pool>().ResendItemToPool(other.gameObject);
-                //Destroy(this.gameObject);
+                pool.ResendItemToPool(other.gameObject);
             }
 
         }
@@ -162,8 +165,7 @@ public class PlayerController : MonoBehaviour
                 gameObject.GetComponent<Rigidbody>().AddForce(Vector3.back * force * speed);
                 other.gameObject.transform.DOScale(Vector3.zero, speed / 2);
                 yield return new WaitForSeconds(speed);
-                pool.GetComponent<Pool>().ResendItemToPool(other.gameObject);
-                //Destroy(this.gameObject);
+                pool.ResendItemToPool(other.gameObject);
             }
         }
     }
