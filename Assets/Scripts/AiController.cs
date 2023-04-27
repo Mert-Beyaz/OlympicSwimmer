@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using DG.Tweening;
 using UnityEngine;
 
@@ -8,17 +9,21 @@ public class AiController : MonoBehaviour
     public List<Transform> aiRoadTransformList = new List<Transform>();
     Transform aiTransform;
     public Animator AiAnimator;
-    public float aiSpeed, force;
+    float aiSpeed = 3f;
+    public float force;
     bool isAiJump, AiSwimming;
     int leftRoad = 0;
     int rightRoad = 3;
     Sequence seq;
     public Pool pool;
+    int nextRoad;
+
     void Start()
     {
         aiTransform = GetComponent<Transform>();
         AiAnimator = GetComponent<Animator>();
         pool = GetComponent<Pool>();
+        nextRoad = Random.Range(0, 3);
     }
 
     void Update()
@@ -36,44 +41,49 @@ public class AiController : MonoBehaviour
         if (!isAiJump)
         {
             AiAnimator.SetBool("Jump", true);//animator e jump i ekle dotween i ayarla
-            aiTransform.DOMove(new Vector3(aiTransform.position.x, aiTransform.position.y - 4, aiTransform.position.z + 6), 2);
+            seq = DOTween.Sequence();
+            seq.Append(aiTransform.DOMoveY(aiTransform.position.y + 1, 0.5f));
+            seq.Append(aiTransform.DOMove(new Vector3(aiTransform.position.x, aiTransform.position.y - 5, aiTransform.position.z + 3), 2));
+            seq.Append(aiTransform.DOMoveY(aiTransform.position.y - 4, 2));
             StartCoroutine(WaitJump());
             IEnumerator WaitJump()
             {
                 isAiJump = true;
-                yield return new WaitForSeconds(2);
+                yield return new WaitForSeconds(4.5f);
                 AiSwimming = true;
             }
         }
     }
     void MoveAi()
     {
-        if ((AiAnimator.GetBool("isFinishSwimming")))
+        if ((AiAnimator.GetBool("FinishRace")))
             return;
-        
+
         // yüzme
+
         if (AiSwimming)
         {
-            AiSwimming = false;
-            for (int i = 0; i < aiRoadTransformList.Count / 3; i++)
+            AiAnimator.SetBool("Swim", true);
+            aiTransform.position = Vector3.MoveTowards(aiTransform.position, aiRoadTransformList[nextRoad].position, aiSpeed * Time.deltaTime);
+            if (aiTransform.position == aiRoadTransformList[nextRoad].position)
             {
-                int nextRoad = Random.Range(leftRoad, rightRoad);
-
-                aiTransform.position = Vector3.Lerp(aiTransform.position, aiRoadTransformList[nextRoad].position, aiSpeed);
-                StartCoroutine(WaitMove());
-                IEnumerator WaitMove()
+                leftRoad += 3;
+                rightRoad += 3;
+                nextRoad = Random.Range(leftRoad, rightRoad);
+                if (rightRoad > aiRoadTransformList.Count)
                 {
-                    yield return new WaitForSeconds(aiSpeed);
-                    leftRoad += 3;
-                    rightRoad += 3;
+                    FinishRaceAi();
+                    AiSwimming = false;
                 }
             }
-        } 
+        }
     }
+
 
     void FinishRaceAi()
     {
-
+        Debug.Log("aa");
+        AiAnimator.SetBool("FinishRace", true);
     }
 
 
@@ -96,22 +106,9 @@ public class AiController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-
-        //if (other.gameObject.tag == "Coin")
-        //{
-        //    StartCoroutine(DestroyItem());
-        //    IEnumerator DestroyItem()
-        //    {
-        //        seq.Append(other.transform.DOLocalMoveY(1, aiSpeed / 2));
-        //        seq.Join(other.transform.DOScale(Vector3.zero, aiSpeed / 2));
-        //        yield return new WaitForSeconds(aiSpeed);
-        //        pool.ResendItemToPool(other.gameObject);
-        //    }
-        //}
-
         if (other.gameObject.tag == "finishLine")
         {
-            AiAnimator.SetBool("isFinishSwimming", true);
+            AiAnimator.SetBool("FinishRace", true);
             StartCoroutine(EndGame());
             IEnumerator EndGame()
             {
