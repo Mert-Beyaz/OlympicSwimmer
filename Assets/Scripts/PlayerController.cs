@@ -8,14 +8,15 @@ public class PlayerController : MonoBehaviour
 {
     public static PlayerController Instance;
     public Animator Animator;
-    public Transform playerTransform;
+    public Transform playerTransform, First, Second, Third;
     public Rigidbody rb;
     public Pool pool;
     public float speed, force;
-    public bool isGameEnd, isPlayerJump; //false
+    public bool isGameEnd, isPlayerJump, aiFinish; //false
     Sequence seq;
     public int CoinCounter;
     public TMP_Text CoinCounterText;
+    public List<GameObject> RankList = new List<GameObject>();//oyun tekrar başlayınca temizle
 
     private void Awake()
     {
@@ -38,6 +39,7 @@ public class PlayerController : MonoBehaviour
     {
         Jump();
         Move();
+        FinishRace();
     }
 
     private void Jump()
@@ -83,6 +85,9 @@ public class PlayerController : MonoBehaviour
         if (!isPlayerJump)
             return;
 
+        if (aiFinish)
+            return;
+             
         if (Input.GetKey(KeyCode.W))
         {
             rb.velocity = new Vector3(0, 0, speed);
@@ -102,8 +107,7 @@ public class PlayerController : MonoBehaviour
         {
             if (playerTransform.position.x >= -2)
             {
-                playerTransform.DOMove(new Vector3(playerTransform.position.x - 2, playerTransform.position.y, playerTransform.position.z), (speed/5f));
-                //Lerp ile yapmayı dene
+                playerTransform.DOMove(new Vector3(playerTransform.position.x - 2, playerTransform.position.y, playerTransform.position.z), (speed/20f));
             }
         }
 
@@ -111,16 +115,33 @@ public class PlayerController : MonoBehaviour
         {
             if (playerTransform.position.x <= 2)
             {
-                playerTransform.DOMove(new Vector3(playerTransform.position.x + 2, playerTransform.position.y, playerTransform.position.z), (speed/5f));
-                //playerTransform.position = Vector3.Lerp(playerTransform.position, (playerTransform.position + (new Vector3(2, 0, 0))), speed * Time.deltaTime);           
-                //Lerp ile yapmayı dene daha soft bir geçiş lazım
+                playerTransform.DOMove(new Vector3(playerTransform.position.x + 2, playerTransform.position.y, playerTransform.position.z), (speed/20f));
             }
         }
     }
 
     void FinishRace()
     {
-        isGameEnd = true;
+        if (RankList.Count == 4)
+        {
+            RankList[0].transform.position = First.position;
+            RankList[1].transform.position = Second.position;
+            RankList[2].transform.position = Third.position;
+            for (int i = 0; i < 3; i++)
+            {
+                if (RankList[i].tag == "Player")
+                {
+                    Animator.SetBool("isWin", true);
+                }
+                else
+                {
+                    //RankList[i].GetComponent<Animator>().AiAnimator.SetBool("Win");
+                    //Ai lara da kutlama anim i ekle
+
+                }
+            }
+        }
+        
     }
 
     private void OnTriggerEnter(Collider other)
@@ -130,14 +151,9 @@ public class PlayerController : MonoBehaviour
             Animator.SetBool("isSwimming", false);
             Animator.SetBool("isTreading", false);
             Animator.SetBool("isFinishSwimming", true);
-            StartCoroutine(EndGame());
-            IEnumerator EndGame()
-            {
-                //playerTransform.position = Vector3.Lerp(playerTransform.position, (playerTransform.position + (new Vector3(1,1,1)), 0.5f * Time.deltaTime));
-                playerTransform.DOMove(new Vector3(playerTransform.position.x, playerTransform.position.y - 0.5f, playerTransform.position.z + 2.5f),speed);
-                yield return new WaitForSeconds(3);
-                FinishRace();
-            }
+            playerTransform.DOMove(new Vector3(playerTransform.position.x, playerTransform.position.y - 1.2f, playerTransform.position.z + 3.7f), speed);
+            isGameEnd = true;
+            RankList.Add(gameObject);
         }
 
         if (other.gameObject.tag == "Coin")

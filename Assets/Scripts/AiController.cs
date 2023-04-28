@@ -30,6 +30,7 @@ public class AiController : MonoBehaviour
     {
         JumpAi();
         MoveAi();
+        FinishRaceAi();
     }
 
     void JumpAi()
@@ -56,7 +57,7 @@ public class AiController : MonoBehaviour
     }
     void MoveAi()
     {
-        if ((AiAnimator.GetBool("FinishRace")))
+        if ((AiAnimator.GetBool("FinishRaceWin")))
             return;
 
         // yüzme
@@ -72,7 +73,6 @@ public class AiController : MonoBehaviour
                 nextRoad = Random.Range(leftRoad, rightRoad);
                 if (rightRoad > aiRoadTransformList.Count)
                 {
-                    FinishRaceAi();
                     AiSwimming = false;
                 }
             }
@@ -82,7 +82,10 @@ public class AiController : MonoBehaviour
 
     void FinishRaceAi()
     {
-        Debug.Log("aa");
+        if (PlayerController.Instance.isGameEnd || PlayerController.Instance.aiFinish)
+        {
+            
+        }
         AiAnimator.SetBool("FinishRace", true);
     }
 
@@ -108,15 +111,12 @@ public class AiController : MonoBehaviour
     {
         if (other.gameObject.tag == "finishLine")
         {
-            AiAnimator.SetBool("FinishRace", true);
-            StartCoroutine(EndGame());
-            IEnumerator EndGame()
-            {
-                //playerTransform.position = Vector3.Lerp(playerTransform.position, (playerTransform.position + (new Vector3(1,1,1)), 0.5f * Time.deltaTime));
-                aiTransform.DOMove(new Vector3(aiTransform.position.x, aiTransform.position.y - 0.5f, aiTransform.position.z + 2.5f), aiSpeed);
-                yield return new WaitForSeconds(3);
-                FinishRaceAi();
-            }
+            AiSwimming = false;
+            AiAnimator.SetBool("FinishRaceWin", true);
+            PlayerController.Instance.aiFinish = true;
+            PlayerController.Instance.RankList.Add(gameObject);
+            aiTransform.DOMove(new Vector3(aiTransform.position.x, aiTransform.position.y - 0.4f, aiTransform.position.z + 3.5f), aiSpeed);
+            PlayerController.Instance.isGameEnd = true;
         }
     }
 }

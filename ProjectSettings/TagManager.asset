@@ -5,13 +5,15 @@ TagManager:
   serializedVersion: 2
   tags:
   - finishLine
-  - Swimmer
-  - SwimmerAi
   - GameManager
   - CoinCounterText
   - Canvas
   - Coin
   - Lifeline
+  - AI2
+  - AI3
+  - AI4
+  - AI1
   layers:
   - Default
   - TransparentFX
