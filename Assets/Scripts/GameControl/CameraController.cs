@@ -23,7 +23,7 @@ public class CameraController : MonoBehaviour
                 yield return new WaitForSeconds(3);
                 seq.Append(transform.DOLocalMove(new Vector3(237.91f, 11.47f, 252.88f), 1));
                 seq.Join(transform.DOLocalRotate(new Vector3(18, 45, 2), 2));
-                ///burada sıkıntı var
+                ///burada sıkıntı var update diye
                 player.audioSource.clip = player.Clips[4];
                 player.audioSource.Play();
                 player.audioSource.loop = true;
