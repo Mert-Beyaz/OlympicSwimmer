@@ -30,7 +30,6 @@ public class AiController : MonoBehaviour
     {
         JumpAi();
         MoveAi();
-        FinishRaceAi();
     }
 
     void JumpAi()
@@ -80,17 +79,6 @@ public class AiController : MonoBehaviour
     }
 
 
-    void FinishRaceAi()
-    {
-        if (PlayerController.Instance.isGameEnd || PlayerController.Instance.aiFinish)
-        {
-            
-        }
-        AiAnimator.SetBool("FinishRace", true);
-    }
-
-
-
 
     private void OnTriggerStay(Collider other)
     {
@@ -115,7 +103,7 @@ public class AiController : MonoBehaviour
             AiAnimator.SetBool("FinishRaceWin", true);
             PlayerController.Instance.aiFinish = true;
             PlayerController.Instance.RankList.Add(gameObject);
-            aiTransform.DOMove(new Vector3(aiTransform.position.x, aiTransform.position.y - 0.4f, aiTransform.position.z + 3.5f), aiSpeed);
+            aiTransform.DOMove(new Vector3(aiTransform.position.x, aiTransform.position.y - 1.2f, aiTransform.position.z + 3.7f), aiSpeed);
             PlayerController.Instance.isGameEnd = true;
         }
     }

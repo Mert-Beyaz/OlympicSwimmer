@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -12,11 +13,14 @@ public class PlayerController : MonoBehaviour
     public Rigidbody rb;
     public Pool pool;
     public float speed, force;
-    public bool isGameEnd, isPlayerJump, aiFinish; //false
+    public bool isGameEnd, isPlayerJump, aiFinish, isCorrectAnswer; //false
     Sequence seq;
     public int CoinCounter;
     public TMP_Text CoinCounterText;
-    public List<GameObject> RankList = new List<GameObject>();//oyun tekrar başlayınca temizle
+    public Button WaitImage;
+    public List<GameObject> RankList; //oyun tekrar başlayınca temizle
+    public AudioSource audioSource;
+    public AudioClip[] Clips;
 
     private void Awake()
     {
@@ -32,22 +36,25 @@ public class PlayerController : MonoBehaviour
         Animator = GetComponent<Animator>();
         playerTransform = GetComponent<Transform>();
         pool = GetComponent<Pool>();
+        RankList.Clear();
+        WaitImage.gameObject.SetActive(false);
+        audioSource.clip = Clips[0];
+        audioSource.Play();
     }
 
 
     void Update()
     {
-        Jump();
         Move();
         FinishRace();
     }
 
-    private void Jump()
+    public void Jump()
     {
         if (isPlayerJump)
             return;
         
-        if (Input.GetKey(KeyCode.Space))
+        if (isCorrectAnswer)
         {
             Animator.SetBool("greatJump", true);
             playerTransform.DOMove(new Vector3(playerTransform.position.x, playerTransform.position.y - 4, playerTransform.position.z + 6), 2);
@@ -55,25 +62,40 @@ public class PlayerController : MonoBehaviour
             IEnumerator WaitJump()
             {
                 isPlayerJump = true;
-                yield return new WaitForSeconds(2);
+                yield return new WaitForSeconds(0.5f);
+                audioSource.clip = Clips[1];
+                audioSource.Play();
+                yield return new WaitForSeconds(1);
+                audioSource.clip = Clips[2];
+                audioSource.Play();
+                yield return new WaitForSeconds(0.5f);
             }
             Animator.SetBool("isTreading", true);
+
         }
 
-        else if (Input.GetKey(KeyCode.LeftShift))
+        else if (!isCorrectAnswer)
         {
             Animator.SetBool("badJump", true);
             seq = DOTween.Sequence();
-            seq.Append(playerTransform.DOMoveY(playerTransform.position.y + 1, 0.5f));
+            seq.Append(playerTransform.DOMoveY(playerTransform.position.y + 2, 0.5f));
             seq.Append(playerTransform.DOMove(new Vector3(playerTransform.position.x, playerTransform.position.y - 5, playerTransform.position.z + 3), 2));
             seq.Append(playerTransform.DOMoveY(playerTransform.position.y - 4, 2));
             StartCoroutine(WaitJump());
             IEnumerator WaitJump()
             {
                 isPlayerJump = true;
-                yield return new WaitForSeconds(4.5f);
+                yield return new WaitForSeconds(1f);
+                audioSource.clip = Clips[1];
+                audioSource.Play();
+                yield return new WaitForSeconds(1);
+                audioSource.clip = Clips[2];
+                audioSource.Play();
+                yield return new WaitForSeconds(2.5f);
+
             }
             Animator.SetBool("isTreading", true);
+
         }
     }
 
@@ -91,7 +113,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.W))
         {
             rb.velocity = new Vector3(0, 0, speed);
-            playerTransform.DOMoveY(-1.8f, 1);
+            playerTransform.DOMoveY(-2f, 1);
             Animator.SetBool("isSwimming", true);
             Animator.SetBool("isTreading", false);
         }
@@ -122,26 +144,34 @@ public class PlayerController : MonoBehaviour
 
     void FinishRace()
     {
-        if (RankList.Count == 4)
+        if (RankList.Count == 3)
         {
-            RankList[0].transform.position = First.position;
-            RankList[1].transform.position = Second.position;
-            RankList[2].transform.position = Third.position;
-            for (int i = 0; i < 3; i++)
+            StartCoroutine(WaitFinish());
+            IEnumerator WaitFinish()
             {
-                if (RankList[i].tag == "Player")
-                {
-                    Animator.SetBool("isWin", true);
-                }
-                else
-                {
-                    //RankList[i].GetComponent<Animator>().AiAnimator.SetBool("Win");
-                    //Ai lara da kutlama anim i ekle
+                yield return new WaitForSeconds(3);
+                WaitImage.gameObject.SetActive(false);
+                RankList[0].transform.position = First.position;
+                RankList[0].transform.rotation = First.rotation;
+                RankList[1].transform.position = Second.position;
+                RankList[1].transform.rotation = Second.rotation;
+                RankList[2].transform.position = Third.position;
+                RankList[2].transform.rotation = Third.rotation;
 
+                for (int i = 0; i < 3; i++)
+                {
+                    if (RankList[i].tag == "Player")
+                    {
+                        Animator.SetBool("isWin", true);
+                    }
+                    else
+                    {
+                        Animator anim = RankList[i].gameObject.GetComponent<Animator>();
+                        anim.SetBool("Win", true);
+                    }
                 }
             }
         }
-        
     }
 
     private void OnTriggerEnter(Collider other)
@@ -153,7 +183,11 @@ public class PlayerController : MonoBehaviour
             Animator.SetBool("isFinishSwimming", true);
             playerTransform.DOMove(new Vector3(playerTransform.position.x, playerTransform.position.y - 1.2f, playerTransform.position.z + 3.7f), speed);
             isGameEnd = true;
+            WaitImage.gameObject.SetActive(true);
             RankList.Add(gameObject);
+            audioSource.clip = Clips[3];
+            audioSource.Play();
+            audioSource.loop = false;
         }
 
         if (other.gameObject.tag == "Coin")
