@@ -12,15 +12,17 @@ public class PlayerController : MonoBehaviour
     public Transform playerTransform, First, Second, Third;
     public Rigidbody rb;
     public Pool pool;
+    public GameObject Ranking, Particular, Short;
     public float speed, force;
     public bool isGameEnd, isPlayerJump, aiFinish, isCorrectAnswer; //false
     Sequence seq;
     public int CoinCounter;
-    public TMP_Text CoinCounterText;
-    public Button WaitImage;
+    public TMP_Text CoinCounterText, PlayerText;
+    public Image WaitImage, ShopImage, FinishUIimage;
     public List<GameObject> RankList; //oyun tekrar başlayınca temizle
     public AudioSource audioSource;
     public AudioClip[] Clips;
+    Color objectColor;
 
     private void Awake()
     {
@@ -40,6 +42,15 @@ public class PlayerController : MonoBehaviour
         WaitImage.gameObject.SetActive(false);
         audioSource.clip = Clips[0];
         audioSource.Play();
+        LoadShortColor();
+
+        objectColor = Short.GetComponent<SkinnedMeshRenderer>().material.color;
+
+        if (PlayerPrefs.HasKey("Coin")) 
+        {
+            CoinCounter = PlayerPrefs.GetInt("Coin");
+            CoinCounterText.text = "Coin = " + CoinCounter;
+        }
     }
 
 
@@ -56,6 +67,7 @@ public class PlayerController : MonoBehaviour
         
         if (isCorrectAnswer)
         {
+            Ranking.gameObject.SetActive(true);
             Animator.SetBool("greatJump", true);
             playerTransform.DOMove(new Vector3(playerTransform.position.x, playerTransform.position.y - 4, playerTransform.position.z + 6), 2);
             StartCoroutine(WaitJump());
@@ -71,11 +83,11 @@ public class PlayerController : MonoBehaviour
                 yield return new WaitForSeconds(0.5f);
             }
             Animator.SetBool("isTreading", true);
-
         }
 
         else if (!isCorrectAnswer)
         {
+            Ranking.gameObject.SetActive(true);
             Animator.SetBool("badJump", true);
             seq = DOTween.Sequence();
             seq.Append(playerTransform.DOMoveY(playerTransform.position.y + 2, 0.5f));
@@ -107,7 +119,7 @@ public class PlayerController : MonoBehaviour
         if (!isPlayerJump)
             return;
 
-        if (aiFinish)
+        if (isGameEnd)
             return;
              
         if (Input.GetKey(KeyCode.W))
@@ -146,6 +158,7 @@ public class PlayerController : MonoBehaviour
     {
         if (RankList.Count == 3)
         {
+            isGameEnd = true;
             StartCoroutine(WaitFinish());
             IEnumerator WaitFinish()
             {
@@ -160,7 +173,7 @@ public class PlayerController : MonoBehaviour
 
                 for (int i = 0; i < 3; i++)
                 {
-                    if (RankList[i].tag == "Player")
+                    if (RankList[i].CompareTag("Player"))
                     {
                         Animator.SetBool("isWin", true);
                     }
@@ -176,7 +189,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "finishLine")
+        if (other.gameObject.CompareTag("finishLine"))
         {
             Animator.SetBool("isSwimming", false);
             Animator.SetBool("isTreading", false);
@@ -185,12 +198,15 @@ public class PlayerController : MonoBehaviour
             isGameEnd = true;
             WaitImage.gameObject.SetActive(true);
             RankList.Add(gameObject);
+
             audioSource.clip = Clips[3];
             audioSource.Play();
             audioSource.loop = false;
+
+            PlayerPrefs.SetInt("Coin", CoinCounter);
         }
 
-        if (other.gameObject.tag == "Coin")
+        if (other.gameObject.CompareTag("Coin"))
         {
             CoinCounter++;
             CoinCounterText.text = "Coin = " + CoinCounter;
@@ -207,7 +223,7 @@ public class PlayerController : MonoBehaviour
     }
     private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.tag == "Lifeline")
+        if (other.gameObject.CompareTag("Lifeline"))
         {
             StartCoroutine(DestroyItem());
             IEnumerator DestroyItem()
@@ -217,6 +233,18 @@ public class PlayerController : MonoBehaviour
                 yield return new WaitForSeconds(speed);
                 pool.ResendItemToPool(other.gameObject);
             }
+        }
+    }
+
+    private void LoadShortColor()
+    {
+        if (PlayerPrefs.HasKey("red") && PlayerPrefs.HasKey("green") && PlayerPrefs.HasKey("blue"))
+        {
+            float red = PlayerPrefs.GetFloat("red");
+            float green = PlayerPrefs.GetFloat("green");
+            float blue = PlayerPrefs.GetFloat("blue");
+            Color color = new Color(red, green, blue);
+            Short.GetComponent<SkinnedMeshRenderer>().material.color = color;
         }
     }
 }

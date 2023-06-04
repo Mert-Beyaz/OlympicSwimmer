@@ -49,7 +49,7 @@ public class AiController : MonoBehaviour
             IEnumerator WaitJump()
             {
                 isAiJump = true;
-                yield return new WaitForSeconds(4.5f);
+                yield return new WaitForSeconds(4f);
                 AiSwimming = true;
             }
         }
@@ -82,14 +82,15 @@ public class AiController : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.tag == "Lifeline")
+        if (other.gameObject.CompareTag("Lifeline"))
         {
             StartCoroutine(DestroyItem());
             IEnumerator DestroyItem()
             {
                 gameObject.GetComponent<Rigidbody>().AddForce(Vector3.back * force * aiSpeed);
                 other.gameObject.transform.DOScale(Vector3.zero, aiSpeed / 2);
-                yield return new WaitForSeconds(aiSpeed);
+                yield return new WaitForSeconds(aiSpeed/2);
+                other.gameObject.SetActive(false);
                 pool.ResendItemToPool(other.gameObject);
             }
         }
@@ -97,14 +98,13 @@ public class AiController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "finishLine")
+        if (other.gameObject.CompareTag("finishLine"))
         {
             AiSwimming = false;
             AiAnimator.SetBool("FinishRaceWin", true);
             PlayerController.Instance.aiFinish = true;
             PlayerController.Instance.RankList.Add(gameObject);
             aiTransform.DOMove(new Vector3(aiTransform.position.x, aiTransform.position.y - 1.2f, aiTransform.position.z + 3.7f), aiSpeed);
-            PlayerController.Instance.isGameEnd = true;
         }
     }
 }

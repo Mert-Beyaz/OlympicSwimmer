@@ -8,8 +8,6 @@ public class ItemSpawnController : MonoBehaviour
     public List<Transform> spawnTransformList = new List<Transform>();
     private int number;
 
-    //ai ların hepsi için ayrı ayrı transform listesi oluşturmak lazım son satırları sil yerine transform listelerini koy
-
     void Start()
     {
         SpawnItems();
