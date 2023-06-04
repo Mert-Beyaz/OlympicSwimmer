@@ -231,6 +231,7 @@ public class PlayerController : MonoBehaviour
                 gameObject.GetComponent<Rigidbody>().AddForce(Vector3.back * force * speed);
                 other.gameObject.transform.DOScale(Vector3.zero, speed / 2);
                 yield return new WaitForSeconds(speed);
+                other.gameObject.SetActive(false);
                 pool.ResendItemToPool(other.gameObject);
             }
         }

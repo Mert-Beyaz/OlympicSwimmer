@@ -28,8 +28,8 @@ public class CameraController : MonoBehaviour
             IEnumerator WaitFinish()
             {
                 yield return new WaitForSeconds(3);
-                seq.Append(transform.DOLocalMove(new Vector3(237.91f, 11.47f, 252.88f), 1));
-                seq.Join(transform.DOLocalRotate(new Vector3(18, 45, 2), 2));
+                seq.Append(transform.DOLocalMove(new Vector3(72.26f, 10.76f, -107.54f), 1));
+                seq.Join(transform.DOLocalRotate(new Vector3(18.6f, 45, 0), 2));
                 player.PlayerText.gameObject.SetActive(true);
                 player.Ranking.SetActive(false);
                 player.Particular.SetActive(true);
