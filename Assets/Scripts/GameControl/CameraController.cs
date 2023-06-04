@@ -30,9 +30,13 @@ public class CameraController : MonoBehaviour
                 yield return new WaitForSeconds(3);
                 seq.Append(transform.DOLocalMove(new Vector3(237.91f, 11.47f, 252.88f), 1));
                 seq.Join(transform.DOLocalRotate(new Vector3(18, 45, 2), 2));
+<<<<<<< HEAD
                 player.PlayerText.gameObject.SetActive(true);
                 player.Ranking.SetActive(false);
                 player.Particular.SetActive(true);
+=======
+                ///burada sıkıntı var update diye
+>>>>>>> 23553b2e7d11b290b07917a5a5b7df1f2858646c
                 player.audioSource.clip = player.Clips[4];
                 player.audioSource.Play();
                 player.audioSource.loop = true;
