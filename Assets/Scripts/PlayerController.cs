@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
     public AudioClip[] Clips;
     Color objectColor;
 
+
     private void Awake()
     {
         if (Instance)
@@ -33,6 +34,7 @@ public class PlayerController : MonoBehaviour
         }
         Instance = this;
     }
+
     void Start()
     {
         Animator = GetComponent<Animator>();
@@ -52,7 +54,6 @@ public class PlayerController : MonoBehaviour
             CoinCounterText.text = "Coin = " + CoinCounter;
         }
     }
-
 
     void Update()
     {
@@ -154,39 +155,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void FinishRace()
-    {
-        if (RankList.Count == 3)
-        {
-            isGameEnd = true;
-            StartCoroutine(WaitFinish());
-            IEnumerator WaitFinish()
-            {
-                yield return new WaitForSeconds(3);
-                WaitImage.gameObject.SetActive(false);
-                RankList[0].transform.position = First.position;
-                RankList[0].transform.rotation = First.rotation;
-                RankList[1].transform.position = Second.position;
-                RankList[1].transform.rotation = Second.rotation;
-                RankList[2].transform.position = Third.position;
-                RankList[2].transform.rotation = Third.rotation;
-
-                for (int i = 0; i < 3; i++)
-                {
-                    if (RankList[i].CompareTag("Player"))
-                    {
-                        Animator.SetBool("isWin", true);
-                    }
-                    else
-                    {
-                        Animator anim = RankList[i].gameObject.GetComponent<Animator>();
-                        anim.SetBool("Win", true);
-                    }
-                }
-            }
-        }
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("finishLine"))
@@ -221,6 +189,7 @@ public class PlayerController : MonoBehaviour
 
         }
     }
+
     private void OnTriggerStay(Collider other)
     {
         if (other.gameObject.CompareTag("Lifeline"))
@@ -248,4 +217,38 @@ public class PlayerController : MonoBehaviour
             Short.GetComponent<SkinnedMeshRenderer>().material.color = color;
         }
     }
+
+    void FinishRace()
+    {
+        if (RankList.Count == 3)
+        {
+            isGameEnd = true;
+            StartCoroutine(WaitFinish());
+            IEnumerator WaitFinish()
+            {
+                yield return new WaitForSeconds(3);
+                WaitImage.gameObject.SetActive(false);
+                RankList[0].transform.position = First.position;
+                RankList[0].transform.rotation = First.rotation;
+                RankList[1].transform.position = Second.position;
+                RankList[1].transform.rotation = Second.rotation;
+                RankList[2].transform.position = Third.position;
+                RankList[2].transform.rotation = Third.rotation;
+
+                for (int i = 0; i < 3; i++)
+                {
+                    if (RankList[i].CompareTag("Player"))
+                    {
+                        Animator.SetBool("isWin", true);
+                    }
+                    else
+                    {
+                        Animator anim = RankList[i].gameObject.GetComponent<Animator>();
+                        anim.SetBool("Win", true);
+                    }
+                }
+            }
+        }
+    }
+
 }

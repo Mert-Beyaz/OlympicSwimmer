@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using DG.Tweening;
 using UnityEngine;
 
@@ -40,7 +39,7 @@ public class AiController : MonoBehaviour
 
         if (!isAiJump)
         {
-            AiAnimator.SetBool("Jump", true);//animator e jump i ekle dotween i ayarla
+            AiAnimator.SetBool("Jump", true);
             seq = DOTween.Sequence();
             seq.Append(aiTransform.DOMoveY(aiTransform.position.y + 1, 0.5f));
             seq.Append(aiTransform.DOMove(new Vector3(aiTransform.position.x, aiTransform.position.y - 5, aiTransform.position.z + 3), 2));
